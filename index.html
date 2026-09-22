@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#081116" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="A380X PERF" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>A380X Takeoff Performance</title>
+</head>
+<body>
+<header class="topbar">
+  <div><div class="eyebrow">A380X · SIMULATOR PERFORMANCE · v0.3</div><h1>TAKEOFF PERF</h1></div>
+  <div id="netState" class="net">ONLINE</div>
+</header>
+<main class="app-shell">
+<section class="panel input-panel">
+  <div class="section-head"><div class="panel-title">SIMBRIEF IMPORT</div><span class="badge">v0.3</span></div>
+  <div class="grid two">
+    <label>SIMBRIEF PILOT ID<input id="simbriefId" inputmode="numeric" maxlength="7" placeholder="e.g. 1234567" autocomplete="off" /></label>
+    <label>&nbsp;<button id="importSimbrief" class="secondary" type="button">IMPORT LATEST OFP</button></label>
+  </div>
+  <div id="simbriefStatus" class="helper">Imports departure, planned takeoff weight and departure METAR from your latest SimBrief OFP. CG and runway remain pilot-selected.</div>
+  <div id="simbriefSummary" class="ofp-summary" hidden></div>
+
+  <div class="section-head spaced"><div class="panel-title">AIRPORT / RUNWAY</div><button id="syncDb" class="mini">SYNC RWY DB</button></div>
+  <div class="grid two">
+    <label>ICAO<input id="icao" maxlength="4" value="LOWW" autocapitalize="characters" autocomplete="off" /></label>
+    <label>RUNWAY<select id="runway"><option value="">ENTER ICAO</option></select></label>
+  </div>
+  <div id="airportStatus" class="helper">Enter ICAO and load runway data automatically.</div>
+  <div class="grid three compact">
+    <label>TORA <span>m</span><input id="tora" type="number" inputmode="numeric" value="3600" /></label>
+    <label>ELEV <span>ft</span><input id="elev" type="number" inputmode="numeric" value="600" /></label>
+    <label>SLOPE <span>%</span><input id="slope" type="number" inputmode="decimal" value="0" step="0.1" /></label>
+  </div>
+
+  <div class="panel-title sub">AIRCRAFT</div>
+  <div class="grid two">
+    <label>TOW <span>kg</span><input id="tow" type="number" inputmode="numeric" value="450000" min="250000" max="575000" step="100" /></label>
+    <label>CG <span>%MAC</span><input id="cg" type="number" inputmode="decimal" value="36.0" min="28" max="44" step="0.1" /></label>
+  </div>
+
+  <div class="panel-title sub">WEATHER</div>
+  <div class="grid three">
+    <label>OAT <span>°C</span><input id="oat" type="number" inputmode="numeric" value="20" /></label>
+    <label>QNH <span>hPa</span><input id="qnh" type="number" inputmode="numeric" value="1013" /></label>
+    <label>RWY<select id="condition"><option value="dry">DRY</option><option value="wet">WET</option></select></label>
+  </div>
+  <div class="grid two">
+    <label>WIND DIR <span>°</span><input id="windDir" type="number" inputmode="numeric" value="110" /></label>
+    <label>WIND <span>kt</span><input id="windSpeed" type="number" inputmode="numeric" value="8" /></label>
+  </div>
+  <details class="metar-box"><summary>PASTE METAR</summary><div class="metar-row"><input id="metar" placeholder="LOWW 071450Z 11008KT ... 20/11 Q1013"/><button id="parseMetar" class="mini">PARSE</button></div><div id="metarStatus" class="helper">Parses wind, OAT and QNH from a pasted METAR.</div></details>
+
+  <div class="panel-title sub">CONFIGURATION</div>
+  <div class="grid two">
+    <label>FLAPS<select id="flaps"><option value="opt">OPTIMUM</option><option value="1">CONF 1+F</option><option value="2">CONF 2</option><option value="3">CONF 3</option></select></label>
+    <label>THRUST<select id="thrustMode"><option value="flex">FLEX / TOGA</option><option value="toga">TOGA</option></select></label>
+  </div>
+  <div class="grid two toggles">
+    <label class="toggle"><input id="packs" type="checkbox" checked /><span>PACKS ON</span></label>
+    <label class="toggle"><input id="antiIce" type="checkbox" /><span>ENG A/I ON</span></label>
+  </div>
+  <button id="calculate" class="primary">CALCULATE</button>
+</section>
+
+<section class="panel result-panel" aria-live="polite">
+  <div class="panel-title">TAKEOFF DATA</div>
+  <div class="route-line"><span id="outIcao">LOWW</span><span>/ RWY</span><span id="outRunway">—</span></div>
+  <div id="runwayMeta" class="helper result-helper">TORA — · ELEV —</div>
+  <div class="result-grid">
+    <div class="metric"><span>V1</span><strong id="v1">—</strong><small>KT</small></div>
+    <div class="metric"><span>VR</span><strong id="vr">—</strong><small>KT</small></div>
+    <div class="metric"><span>V2</span><strong id="v2">—</strong><small>KT</small></div>
+  </div>
+  <div class="result-list">
+    <div><span>FLAPS</span><b id="outFlaps">—</b></div>
+    <div><span>THRUST</span><b id="thrust">—</b></div>
+    <div><span>FLEX TEMP</span><b id="flex">—</b></div>
+    <div><span>THS FOR</span><b id="ths">—</b></div>
+    <div><span>HEADWIND</span><b id="headwind">—</b></div>
+    <div><span>EST. T/O DIST</span><b id="req">—</b></div>
+    <div><span>EST. MARGIN</span><b id="margin">—</b></div>
+  </div>
+  <div id="validity" class="validity idle">READY</div>
+  <div id="notes" class="notes">Simulator-only estimate. Cross-check with SimBrief A388 / D8-FBW.</div>
+  <div class="conf-table" id="confTable"></div>
+</section>
+<section class="disclaimer"><strong>NOT FOR REAL-WORLD AVIATION.</strong> Unofficial Microsoft Flight Simulator / FlyByWire A380X tool. Airport data is informational and can be inaccurate. Performance output is a calibrated heuristic, not Airbus AFM data.</section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="108" fill="#071014"/>
+  <path d="M66 270h132l56-153c6-16 28-16 34 0l25 153h133c13 0 20 16 10 25l-110 92-17 55c-5 16-27 17-34 2l-28-57-27 57c-7 15-29 14-34-2l-18-55-111-92c-10-9-4-25 9-25z" fill="#63e6ff"/>
+  <text x="256" y="468" text-anchor="middle" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#e7f2f5">A380X</text>
+</svg>
